@@ -11,6 +11,8 @@ import java.util.Random;
 public class SimpleGame extends Game{
     public SimpleGame(Context context){
         super(context);
+        super.setBackgroundImage(ImageManager.BACKGROUND_IMAGE_SIMPLE);
+        gameMode = "SIMPLE";
     }
     @Override
     public void initParameters() {

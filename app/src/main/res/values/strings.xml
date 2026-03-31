@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">AircraftWar</string>
+    <string name="mode1">简单模式</string>
+    <string name="mode2">普通模式</string>
+    <string name="mode3">困难模式</string>
+    <string name="sound">音效</string>
+    <string name="modeChoose">难度选择</string>
+    <string name="SoundIcon">音效图标</string>
 </resources>

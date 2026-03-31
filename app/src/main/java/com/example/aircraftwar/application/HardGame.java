@@ -10,6 +10,8 @@ import java.util.Random;
 public class HardGame extends Game{
     public HardGame(Context context){
         super(context);
+        super.setBackgroundImage(ImageManager.BACKGROUND_IMAGE_HARD);
+        gameMode = "HARD";
     }
     @Override
     public void initParameters() {
