@@ -9,16 +9,12 @@ import androidx.annotation.NonNull;
 
 public class MySurfaceView extends SurfaceView implements
         SurfaceHolder.Callback,Runnable {
-    public float x = 50, y = 50;
     public static int screenWidth = 480, screenHeight = 800;
     boolean mbLoop = false; //控制绘画线程的标志位
     private SurfaceHolder mSurfaceHolder;
-    private Canvas canvas;  //绘图的画布
-    private Paint mPaint;
     public MySurfaceView(Context context) {
         super(context);
         mbLoop = true;
-        mPaint = new Paint();  //设置画笔
         mSurfaceHolder = this.getHolder();
         mSurfaceHolder.addCallback(this);
         this.setFocusable(true);
@@ -31,7 +27,9 @@ public class MySurfaceView extends SurfaceView implements
         while (mbLoop){
             synchronized (mSurfaceHolder){
                 draw();
-            }
+            } try {
+                Thread.sleep(10);
+            } catch (Exception e){}
         }
     }
 
@@ -56,8 +54,5 @@ public class MySurfaceView extends SurfaceView implements
 
     public SurfaceHolder getmSurfaceHolder(){
         return mSurfaceHolder;
-    }
-    public Paint getmPaint(){
-        return mPaint;
     }
 }

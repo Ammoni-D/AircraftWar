@@ -6,4 +6,9 @@
     <string name="sound">音效</string>
     <string name="modeChoose">难度选择</string>
     <string name="SoundIcon">音效图标</string>
+    <string name="rankingList">分数排行榜</string>
+    <string name="username">用户名</string>
+    <string name="score">分数</string>
+    <string name="record">记录分数</string>
+    <string name="delete">删除记录</string>
 </resources>

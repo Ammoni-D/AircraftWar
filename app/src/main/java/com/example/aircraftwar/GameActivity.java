@@ -1,8 +1,12 @@
 package com.example.aircraftwar;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -14,6 +18,16 @@ import com.example.aircraftwar.application.HardGame;
 import com.example.aircraftwar.application.SimpleGame;
 
 public class GameActivity extends AppCompatActivity {
+    public Handler mHandler = new Handler(Looper.getMainLooper()){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if(msg.what==1){
+                setContentView(R.layout.ranking_list);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,5 +57,9 @@ public class GameActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    public Handler getmHandler() {
+        return mHandler;
     }
 }

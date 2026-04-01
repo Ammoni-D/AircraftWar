@@ -6,10 +6,14 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.os.Handler;
+import android.os.Message;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.MotionEvent;
 
+import com.example.aircraftwar.GameActivity;
 import com.example.aircraftwar.MySurfaceView;
 
 import com.example.aircraftwar.aircraft.*;
@@ -28,7 +32,6 @@ import java.util.concurrent.*;
  * @author ammoni
  */
 public abstract class Game extends MySurfaceView {
-
     private int backGroundTop = 0;
 
     /**
@@ -113,10 +116,9 @@ public abstract class Game extends MySurfaceView {
     SurfaceHolder mSurfaceHolder;
     Canvas canvas;
     Paint mPaint;
+    Paint textPaint;
 
-    /**
-     * 图片加载器
-     */
+    Handler mHandler;
 
     abstract public void initParameters();
 
@@ -124,7 +126,9 @@ public abstract class Game extends MySurfaceView {
         super(context);
         resources = context.getResources();
         mSurfaceHolder = getmSurfaceHolder();
-        mPaint = getmPaint();
+        mPaint = new Paint();
+        textPaint = new Paint();
+        mHandler = ((GameActivity) context).getmHandler();
 
         heroAircraft = HeroAircraft.getHeroAircraft();
         initParameters();//初始化参数
@@ -219,7 +223,10 @@ public abstract class Game extends MySurfaceView {
 
                 // Todo:Gameover音乐 & 音乐停止
 
-                // Todo:显示排行榜
+                Message msg = new Message();
+                msg.what = 1;
+                mHandler.sendMessage(msg);
+                // Todo:查找数据，显示在排行榜上
 
                 System.out.println("Game Over!");
             }
@@ -404,8 +411,7 @@ public abstract class Game extends MySurfaceView {
                 heroAircraft.getLocationY() - (float) heroAircraft.getHeight() / 2, mPaint);
 
         //绘制得分和生命值
-        paintScoreAndLife();
-
+        paintScoreAndLife(canvas);
         //提交画布内容
         mSurfaceHolder.unlockCanvasAndPost(canvas);
 
@@ -425,7 +431,43 @@ public abstract class Game extends MySurfaceView {
         }
     }
 
-    // Todo
-    private void paintScoreAndLife() {
+    private void paintScoreAndLife(Canvas canvas) {
+        float x = 10;
+        float y = 50;
+        textPaint.setColor(0xFFFF0000);
+        textPaint.setTypeface(Typeface.SANS_SERIF);
+        textPaint.setTextSize(50);
+
+        canvas.drawText("SCORE:" + score, x, y, textPaint);
+        y = y + 50;
+        canvas.drawText("LIFE:" + heroAircraft.getHp(), x, y, textPaint);
+        y = y + 50;
+
+        textPaint.setColor(0xFFACA9A9);
+        textPaint.setTextSize(40);
+
+        canvas.drawText("---当前游戏参数---", x, y, textPaint);
+        y = y + 40;
+        canvas.drawText("普通敌机血量："+mobEnemyHp , x, y, textPaint);
+        y = y + 40;
+        canvas.drawText("移速："+mobEnemySpeed, x, y, textPaint);
+        y = y + 40;
+        canvas.drawText("精英敌机血量："+eliteEnemyHp, x, y, textPaint);
+        y = y + 40;
+        canvas.drawText("移速："+eliteEnemySpeed, x, y, textPaint);
+        y = y + 40;
+        canvas.drawText("超级精英敌机血量："+superEliteEnemyHp, x, y, textPaint);
+        y = y + 40;
+        canvas.drawText("移速："+superEliteEnemySpeed, x, y, textPaint);
+        y = y + 40;
+        if(!gameMode.equals("EASY")){
+            canvas.drawText("boss敌机初始血量："+bossEnemyHp, x, y, textPaint);
+            y = y + 40;
+        }
+        canvas.drawText("敌机产生周期："+enemyCycle+"ms", x, y, textPaint);
+        y = y + 40;
+        canvas.drawText("敌机射击周期："+enemyShootCycle+"ms", x, y, textPaint);
+        y = y + 40;
+        canvas.drawText("精英机产生概率："+eliteProb, x, y, textPaint);
     }
 }
