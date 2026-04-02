@@ -1,5 +1,6 @@
 package com.example.aircraftwar.prop;
 
+import android.media.SoundPool;
 
 import com.example.aircraftwar.aircraft.AbstractAircraft;
 import com.example.aircraftwar.application.Game;
@@ -18,7 +19,11 @@ public class BombProp extends BaseProp {
     public void activate(Game game) {
         System.out.println("BombSupply active!");
         notifyAllAircraft();
-        // Todo:音效
+        if(game.musicSetting) {
+            // 音效
+            SoundPool soundPool = game.getSoundPool();
+            soundPool.play(game.bombMusicId, 1, 1, 1, 0, 1);
+        }
 
         List<BaseBullet> enemyBullets=game.getEnemyBullets();
         for(BaseBullet bullet:enemyBullets){

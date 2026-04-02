@@ -2,6 +2,7 @@ package com.example.aircraftwar.application;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.widget.Toast;
 
 import com.example.aircraftwar.MySurfaceView;
 import com.example.aircraftwar.aircraft.*;
@@ -9,8 +10,8 @@ import com.example.aircraftwar.aircraft.*;
 import java.util.Random;
 
 public class SimpleGame extends Game{
-    public SimpleGame(Context context){
-        super(context);
+    public SimpleGame(Context context, boolean musicSetting){
+        super(context, musicSetting);
         super.setBackgroundImage(ImageManager.BACKGROUND_IMAGE_SIMPLE);
         gameMode = "SIMPLE";
     }
@@ -37,7 +38,7 @@ public class SimpleGame extends Game{
         eliteProb+=0.05;
         enemyShootCycle-=20;
         enemyCycle-=20;
-        System.out.println("难度升级！当前精英机产生概率："+eliteProb+"，敌机周期："+enemyCycle+"ms，敌机射击周期："+enemyShootCycle+"ms");
+        Toast.makeText(context, "难度升级！当前精英机产生概率："+eliteProb+"，敌机周期："+enemyCycle+"ms，敌机射击周期："+enemyShootCycle+"ms", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -103,10 +104,12 @@ public class SimpleGame extends Game{
                             bossEnemyHp,
                             new CircleShoot()
                     ));
-                    // Todo:背景音乐暂停
-
-                    // Todo:boss音乐
-
+                    if(musicSetting){
+                        // 背景音乐暂停
+                        bgmMediaPlayer.pause();
+                        // boss音乐
+                        bossMediaPlayer.start();
+                    }
                 }
             }
         }

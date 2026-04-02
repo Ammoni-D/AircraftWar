@@ -1,5 +1,7 @@
 package com.example.aircraftwar.prop;
 
+import android.media.SoundPool;
+
 import com.example.aircraftwar.application.Game;
 
 public class AddBloodProp extends BaseProp {
@@ -10,6 +12,10 @@ public class AddBloodProp extends BaseProp {
     @Override
     public void activate(Game game) {
         game.getHeroAircraft().increaseHp(30);
-        // Todo:音效
+        // 音效
+        if(game.musicSetting) {
+            SoundPool soundPool = game.getSoundPool();
+            soundPool.play(game.supplyMusicId, 1, 1, 1, 0, 1);
+        }
     }
 }

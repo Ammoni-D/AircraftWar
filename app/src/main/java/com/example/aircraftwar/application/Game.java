@@ -7,15 +7,20 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.media.AudioAttributes;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Handler;
 import android.os.Message;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import com.example.aircraftwar.GameActivity;
 import com.example.aircraftwar.MySurfaceView;
 
+import com.example.aircraftwar.R;
 import com.example.aircraftwar.aircraft.*;
 import com.example.aircraftwar.bullet.BaseBullet;
 import com.example.aircraftwar.basic.AbstractFlyingObject;
@@ -83,9 +88,7 @@ public abstract class Game extends MySurfaceView {
     protected int count=0;//已生成敌机数量
 
     public String gameMode;
-//    public boolean musicSetting;
-
-//    protected MusicThread musicThread,bossMusicThread;
+    public boolean musicSetting;
 
     public HeroAircraft getHeroAircraft() {
         return heroAircraft;
@@ -112,6 +115,7 @@ public abstract class Game extends MySurfaceView {
     /**
      * 界面有关
      */
+    Context context;
     static Resources resources;
     SurfaceHolder mSurfaceHolder;
     Canvas canvas;
@@ -120,18 +124,32 @@ public abstract class Game extends MySurfaceView {
 
     Handler mHandler;
 
+    /**
+     * 音乐播放器
+     */
+    MediaPlayer bgmMediaPlayer = null, bossMediaPlayer = null;
+    SoundPool soundPool = null;
+    public SoundPool getSoundPool() {
+        return soundPool;
+    }
+    public int bombMusicId, bulletMusicId, supplyMusicId, gameoverMusicId;
+
     abstract public void initParameters();
 
-    public Game(Context context) {
+    public Game(Context context, boolean musicSetting) {
         super(context);
+        this.context = context;
+        this.musicSetting = musicSetting;
         resources = context.getResources();
         mSurfaceHolder = getmSurfaceHolder();
         mPaint = new Paint();
         textPaint = new Paint();
         mHandler = ((GameActivity) context).getmHandler();
 
-        heroAircraft = HeroAircraft.getHeroAircraft();
         initParameters();//初始化参数
+        if(musicSetting) initMusic();
+
+        heroAircraft = HeroAircraft.getHeroAircraft();
         enemyAircrafts = Collections.synchronizedList(new LinkedList<>());
         heroBullets = Collections.synchronizedList(new LinkedList<>());
         enemyBullets = Collections.synchronizedList(new LinkedList<>());
@@ -167,12 +185,28 @@ public abstract class Game extends MySurfaceView {
         });
     }
 
+    public void initMusic(){
+        bgmMediaPlayer = MediaPlayer.create(context, R.raw.bgm);
+        bossMediaPlayer = MediaPlayer.create(context, R.raw.bgm_boss);
+        // 创建 AudioAttributes
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        soundPool = new SoundPool.Builder().setAudioAttributes(audioAttributes).setMaxStreams(10).build();
+        bombMusicId = soundPool.load(context, R.raw.bomb_explosion, 1);
+        bulletMusicId = soundPool.load(context, R.raw.bullet_hit, 1);
+        supplyMusicId = soundPool.load(context, R.raw.get_supply, 1);
+        gameoverMusicId = soundPool.load(context, R.raw.game_over, 1);
+    }
     /**
      * 游戏启动入口，执行游戏逻辑
      */
     public void action() {
-        // Todo:播放音乐
-
+        // 播放背景音乐
+        if(musicSetting) {
+            bgmMediaPlayer.start();
+        }
         // Scheduled 线程池，用于定时任务调度
         ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
 
@@ -221,14 +255,22 @@ public abstract class Game extends MySurfaceView {
                 executorService.shutdown();
                 gameOverFlag = true;
 
-                // Todo:Gameover音乐 & 音乐停止
+                // Gameover音乐 & 音乐停止
+                if(musicSetting) {
+                    bgmMediaPlayer.stop();
+                    bossMediaPlayer.stop();
+                    bgmMediaPlayer.release();
+                    bossMediaPlayer.release();
+                    soundPool.play(gameoverMusicId, 1, 1, 1, 0, 1);
+                    soundPool.release();
+                }
 
                 Message msg = new Message();
                 msg.what = 1;
                 mHandler.sendMessage(msg);
                 // Todo:查找数据，显示在排行榜上
 
-                System.out.println("Game Over!");
+                Toast.makeText(context, "Game over!", Toast.LENGTH_SHORT).show();
             }
         };
 
@@ -252,7 +294,7 @@ public abstract class Game extends MySurfaceView {
     }
 
     private void enemyShootAction() {
-        // TODO 敌机射击
+        // 敌机射击
         for (AbstractAircraft enemyAircraft : enemyAircrafts) {
             synchronized (enemyBullets) {
                 enemyBullets.addAll(enemyAircraft.shoot());
@@ -294,7 +336,7 @@ public abstract class Game extends MySurfaceView {
      * 3. 英雄获得补给
      */
     private void crashCheckAction() {
-        // TODO 敌机子弹攻击英雄
+        // 敌机子弹攻击英雄
         for (BaseBullet bullet : enemyBullets) {
             if (bullet.notValid()) {
                 continue;
@@ -322,17 +364,23 @@ public abstract class Game extends MySurfaceView {
                 if (enemyAircraft.crash(bullet)) {
                     // 敌机撞击到英雄机子弹
                     // 敌机损失一定生命值
-                    // Todo:击中音效
-
+                    // 击中音效
+                    if(musicSetting) {
+                        soundPool.play(bulletMusicId, 1, 1, 1, 0, 1);
+                    }
                     enemyAircraft.decreaseHp(bullet.getPower());
                     bullet.vanish();
                     if (enemyAircraft.notValid()) {
-                        // TODO 获得分数，产生道具补给
+                        // 获得分数，产生道具补给
                         score += 10;
                         synchronized (props) {
                             props.addAll(enemyAircraft.drop());
                         }
-                        // Todo:Boss音效
+                        // 击败Boss音效
+                        if(musicSetting && enemyAircraft instanceof BossEnemy){
+                            bossMediaPlayer.pause();
+                            bgmMediaPlayer.start();
+                        }
                     }
                 }
                 // 英雄机 与 敌机 相撞，均损毁
@@ -343,7 +391,7 @@ public abstract class Game extends MySurfaceView {
             }
         }
 
-        // Todo: 我方获得道具，道具生效
+        // 我方获得道具，道具生效
         for(BaseProp prop : props){
             if (heroAircraft.crash(prop)) {
                 if(prop instanceof BombProp){

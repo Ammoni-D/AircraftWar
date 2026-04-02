@@ -1,5 +1,7 @@
 package com.example.aircraftwar.prop;
 
+import android.media.SoundPool;
+
 import com.example.aircraftwar.aircraft.HeroAircraft;
 import com.example.aircraftwar.application.DirectShoot;
 import com.example.aircraftwar.application.Game;
@@ -27,6 +29,10 @@ public class FireProp extends BaseProp {
             }
         };
         new Thread(r).start();
-        // Todo:音效
+        // 音效
+        if(game.musicSetting) {
+            SoundPool soundPool = game.getSoundPool();
+            soundPool.play(game.supplyMusicId, 1, 1, 1, 0, 1);
+        }
     }
 }

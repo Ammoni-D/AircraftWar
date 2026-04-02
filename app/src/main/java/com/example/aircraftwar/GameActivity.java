@@ -34,18 +34,19 @@ public class GameActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
 
         String mode = getIntent().getStringExtra("mode");
+        boolean musicSetting = getIntent().getBooleanExtra("musicSetting", false);
         assert mode != null;
 
         Game game;
         switch (mode) {
             case "simple":
-                game = new SimpleGame(this);
+                game = new SimpleGame(this, musicSetting);
                 break;
             case "hard":
-                game = new HardGame(this);
+                game = new HardGame(this, musicSetting);
                 break;
             default:
-                game = new EasyGame(this);
+                game = new EasyGame(this, musicSetting);
                 break;
         }
 

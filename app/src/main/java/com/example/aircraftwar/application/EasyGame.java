@@ -8,8 +8,8 @@ import com.example.aircraftwar.aircraft.*;
 import java.util.Random;
 
 public class EasyGame extends Game{
-    public EasyGame(Context context){
-        super(context);
+    public EasyGame(Context context, boolean musicSetting){
+        super(context, musicSetting);
         super.setBackgroundImage(ImageManager.BACKGROUND_IMAGE);
         gameMode = "EASY";
     }
