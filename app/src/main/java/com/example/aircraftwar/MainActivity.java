@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Button button = (Button) findViewById(R.id.button);
             Button button2 = (Button) findViewById(R.id.button2);
             Button button3 = (Button) findViewById(R.id.button3);
+            Button button_back = (Button) findViewById(R.id.btn_back);
             TextView webState2 = (TextView) findViewById(R.id.webState2);
             TextView start_username2 = (TextView) findViewById(R.id.username2);
             if(online) {
@@ -90,6 +91,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     musicSetting = false;
                 }
             });
+
+            button_back.setOnClickListener(v1 -> setContentView(layoutStart));
         });
 
         button_login.setOnClickListener(v -> {

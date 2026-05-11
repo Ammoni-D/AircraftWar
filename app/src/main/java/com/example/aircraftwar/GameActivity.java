@@ -52,7 +52,6 @@ public class GameActivity extends AppCompatActivity {
 
     private static final ScoreDao scoreDao = MainActivity.scoreDao;
     private Game game;
-    private String oppUsername;
     private Runnable matchRunnable;
     private int count;
 
@@ -92,7 +91,7 @@ public class GameActivity extends AppCompatActivity {
                         runOnUiThread(() -> {
                             // 匹配成功，停止轮询
                             mHandler.removeCallbacks(matchRunnable);
-                            oppUsername = oppName;
+                            game.setOppUsername(oppName);
                             // 启动游戏
                             launchGame();
                         });

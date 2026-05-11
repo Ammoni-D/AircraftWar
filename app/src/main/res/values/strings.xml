@@ -17,4 +17,5 @@
     <string name="showRanking">显示排行榜</string>
     <string name="signup">注册新账号</string>
     <string name="setServer">设置服务器地址</string>
+    <string name="back">返回</string>
 </resources>

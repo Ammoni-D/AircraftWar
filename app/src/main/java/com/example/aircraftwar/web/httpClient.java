@@ -121,7 +121,7 @@ public class httpClient {
                         Gson gson = new Gson();
                         syncScoreResponse resp = gson.fromJson(jsonStr, syncScoreResponse.class);
                         if(resp.state.equals("success")) {
-                            callBack.onSuccess(resp.oppScore);
+                            callBack.onSuccess(resp.oppScore, resp.oppGameOver);
                         }
                         else {
                             callBack.onFailure(resp.message);
@@ -184,7 +184,7 @@ public class httpClient {
         }
     }
 
-    public static void notifyGameOver(String sessionID, notifyGameOverCallBack callBack) {
+    public static void notifyGameOver(String sessionID, generalCallBack callBack) {
         try {
             // 拼接请求地址（带用户ID参数）
             String url = String.format("http://%s:%s/api/gameover?sessionID=%s",
@@ -201,9 +201,9 @@ public class httpClient {
                     if (response.isSuccessful() && response.body() != null) {
                         String jsonStr = response.body().string();
                         Gson gson = new Gson();
-                        notifyGameOverResponse resp = gson.fromJson(jsonStr, notifyGameOverResponse.class);
+                        generalResponse resp = gson.fromJson(jsonStr, generalResponse.class);
                         if(resp.state.equals("success")) {
-                            callBack.onSuccess(resp.oppGameOver);
+                            callBack.onSuccess();
                         }
                         else {
                             callBack.onFailure(resp.message);
@@ -417,6 +417,7 @@ public class httpClient {
 
     private static class syncScoreResponse extends generalResponse {
         int oppScore;
+        boolean oppGameOver;
     }
 
     private static class getRankingResponse extends generalResponse {
@@ -425,10 +426,6 @@ public class httpClient {
 
     private static class requestMatchingResponse extends generalResponse {
         String oppName;
-    }
-
-    private static class notifyGameOverResponse extends generalResponse {
-        boolean oppGameOver;
     }
 
     public static void setServerIp(String IP) {

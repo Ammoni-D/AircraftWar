@@ -193,6 +193,7 @@ public class httpServer {
             String errorMessage = "default";
             String state = "fail";
             int oppScore = 0;
+            boolean oppGameOver = false;
             if (query != null && query.contains("sessionID=") && query.contains("score=")) {
                 String sessionID = query.split("&")[0].split("=")[1];
                 String username = connect.get(sessionID);
@@ -200,6 +201,7 @@ public class httpServer {
                 Room room = user_room.get(username);
                 room.setScore(username, score);
                 oppScore = room.getOppScore(username);
+                oppGameOver = !room.oppAlive(username);
                 state = "success";
             }
             else {
@@ -209,7 +211,8 @@ public class httpServer {
             String responseData = "{\n" +
                     "  \"state\": \"" + state + "\",\n" +
                     "  \"message\": \"" + errorMessage + "\",\n" +
-                    "  \"oppScore\": \"" + oppScore + "\"\n" +
+                    "  \"oppScore\": \"" + oppScore + "\",\n" +
+                    "  \"oppGameOver\": " + oppGameOver + "\n" +
                     "}";
             // 发送响应（200表示成功，第二个参数是响应数据长度）
             exchange.sendResponseHeaders(200, responseData.getBytes(StandardCharsets.UTF_8).length);
@@ -230,7 +233,7 @@ public class httpServer {
             String query = exchange.getRequestURI().getQuery();
             String errorMessage = "default";
             String state = "fail";
-            boolean oppGameOver = false;
+            boolean oppGameOver;
             if (query != null && query.contains("sessionID=")) {
                 String sessionID = query.split("=")[1];
                 String username = connect.get(sessionID);
@@ -244,11 +247,9 @@ public class httpServer {
                 }
                 else {
                     room.gameOver(username);
-                    if (!room.oppAlive(username)) {
-                        oppGameOver = true;
-                    }
+                    oppGameOver = !room.oppAlive(username);
                 }
-                state = "success";
+                if(oppGameOver) state = "success";
             }
             else {
                 errorMessage = "请求格式错误";
@@ -256,8 +257,7 @@ public class httpServer {
 
             String responseData = "{\n" +
                     "  \"state\": \"" + state + "\",\n" +
-                    "  \"message\": \"" + errorMessage + "\",\n" +
-                    "  \"oppGameOver\": " + oppGameOver + "\n" +
+                    "  \"message\": \"" + errorMessage + "\"\n" +
                     "}";
             // 发送响应（200表示成功，第二个参数是响应数据长度）
             exchange.sendResponseHeaders(200, responseData.getBytes(StandardCharsets.UTF_8).length);

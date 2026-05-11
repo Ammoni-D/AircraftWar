@@ -26,8 +26,10 @@ import com.example.aircraftwar.aircraft.*;
 import com.example.aircraftwar.bullet.BaseBullet;
 import com.example.aircraftwar.basic.AbstractFlyingObject;
 import com.example.aircraftwar.prop.*;
+import com.example.aircraftwar.web.generalCallBack;
 import com.example.aircraftwar.web.httpClient;
 import com.example.aircraftwar.web.notifyGameOverCallBack;
+import com.example.aircraftwar.web.requestMatchingCallBack;
 import com.example.aircraftwar.web.syncScoreCallBack;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -145,6 +147,7 @@ public abstract class Game extends MySurfaceView {
     private boolean oppGameOverFlag = false;
     private String oppUsername;
     private int oppScore;
+    private Runnable gameOverRunnable;
 
     public void setOppScore(int oppScore) {
         this.oppScore = oppScore;
@@ -269,8 +272,14 @@ public abstract class Game extends MySurfaceView {
             if(MainActivity.online && time % 500 == 0) {
                 httpClient.syncScore(MainActivity.sessionID, score, new syncScoreCallBack() {
                     @Override
-                    public void onSuccess(int oppScore) {
+                    public void onSuccess(int oppScore, boolean oppGameOver) {
                         setOppScore(oppScore);
+                        if(oppGameOver) {
+                            if(!oppGameOverFlag) {
+                                mHandler.post(() -> Toast.makeText(context, "对方已死亡", Toast.LENGTH_SHORT).show());
+                            }
+                            oppGameOverFlag = true;
+                        }
                     }
 
                     @Override
@@ -300,35 +309,29 @@ public abstract class Game extends MySurfaceView {
                 }
 
                 // 向服务器通知游戏结束并等待对方结束
-                if (MainActivity.online) {
-                    while(!oppGameOverFlag) {
-                        httpClient.notifyGameOver(MainActivity.sessionID, new notifyGameOverCallBack() {
+                // 定义轮询任务
+                gameOverRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        // 发起单次匹配查询
+                        httpClient.notifyGameOver(MainActivity.sessionID, new generalCallBack() {
                             @Override
-                            public void onSuccess(boolean oppGameOver) {
-                                oppGameOverFlag = oppGameOver;
+                            public void onSuccess() {
+                                mHandler.post(() -> gameFinish());
                             }
 
                             @Override
                             public void onFailure(String error) {
-                                mHandler.post(() -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show());
+                                mHandler.post(() -> Toast.makeText(context, "等待对方结束···", Toast.LENGTH_SHORT).show());
+                                // 延迟500ms后再次执行本任务
+                                mHandler.postDelayed(gameOverRunnable, 500);
                             }
                         });
-
-                        if(oppGameOverFlag) break;
-                        Toast.makeText(context, "等待对方游戏结束···", Toast.LENGTH_SHORT).show();
-                        try {
-                            Thread.sleep(200);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
                     }
-                }
-
-                Message msg = new Message();
-                msg.what = 1;
-                mHandler.sendMessage(msg);
-
-                Toast.makeText(context, "Game over!", Toast.LENGTH_SHORT).show();
+                };
+                // 开始第一次轮询
+                if(MainActivity.online) mHandler.post(gameOverRunnable);
+                else gameFinish();
             }
         };
 
@@ -338,6 +341,14 @@ public abstract class Game extends MySurfaceView {
          */
         executorService.scheduleWithFixedDelay(task, timeInterval, timeInterval, TimeUnit.MILLISECONDS);
 
+    }
+
+    private void gameFinish() {
+        Message msg = new Message();
+        msg.what = 1;
+        mHandler.sendMessage(msg);
+
+        Toast.makeText(context, "Game over!", Toast.LENGTH_SHORT).show();
     }
 
     //***********************
@@ -550,9 +561,10 @@ public abstract class Game extends MySurfaceView {
         canvas.drawText("SCORE:" + score, x, y, textPaint);
         y = y + 50;
 
+        // 敌方信息
+        canvas.drawText("OPP NAME:" + oppUsername, opp_x, y - 100, textPaint);
+        canvas.drawText("OPP SCORE:" + oppScore, opp_x, y - 50, textPaint);
         if(oppGameOverFlag) {
-            canvas.drawText("OPP NAME:" + oppUsername, opp_x, y - 100, textPaint);
-            canvas.drawText("OPP SCORE:" + oppScore, opp_x, y - 50, textPaint);
             textPaint.setTextSize(100);
             canvas.drawText("对方已经死亡！", opp_x, y, textPaint);
         }
