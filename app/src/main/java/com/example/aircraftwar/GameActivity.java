@@ -89,12 +89,13 @@ public class GameActivity extends AppCompatActivity {
                 httpClient.requestMatching(MainActivity.sessionID, mode, new requestMatchingCallBack() {
                     @Override
                     public void onSuccess(String oppName) {
-                        // 匹配成功，停止轮询
-                        mHandler.removeCallbacks(matchRunnable);
-                        oppUsername = oppName;
-                        // 启动游戏
-                        setContentView(game);
-                        game.action();
+                        runOnUiThread(() -> {
+                            // 匹配成功，停止轮询
+                            mHandler.removeCallbacks(matchRunnable);
+                            oppUsername = oppName;
+                            // 启动游戏
+                            launchGame();
+                        });
                     }
 
                     @Override
@@ -112,7 +113,8 @@ public class GameActivity extends AppCompatActivity {
         };
 
         // 开始第一次轮询
-        mHandler.post(matchRunnable);
+        if(MainActivity.online) mHandler.post(matchRunnable);
+        else launchGame();
 
         ViewCompat.setOnApplyWindowInsetsListener(game, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -203,5 +205,10 @@ public class GameActivity extends AppCompatActivity {
 
     public Handler getmHandler() {
         return mHandler;
+    }
+
+    private void launchGame() {
+        setContentView(game);
+        game.action();
     }
 }
