@@ -5,87 +5,96 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#AED6F1"
+    android:background="@drawable/choose"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="105dp"
-        android:layout_height="40dp"
-        android:text="@string/modeChoose"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.522"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.25" />
-
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/mode2"
-        tools:layout_editor_absoluteX="160dp"
-        tools:layout_editor_absoluteY="341dp"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="341dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
-    <Button
+    <!-- 简单模式按钮：浅科技蓝紫 -->
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="160dp"
+        android:layout_marginTop="225dp"
+        android:background="@drawable/bg_btn_easy"
         android:text="@string/mode1"
-        tools:layout_editor_absoluteX="160dp"
-        tools:layout_editor_absoluteY="258dp"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="258dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/mode3"
-        tools:layout_editor_absoluteX="160dp"
-        tools:layout_editor_absoluteY="425dp"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="425dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
-    <Button
-        android:id="@+id/btn_back"
-        android:layout_width="107dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="510dp"
-        android:text="@string/back"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:letterSpacing="0.05"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- 普通模式按钮：标准科幻紫 -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="160dp"
+        android:layout_marginTop="450dp"
+        android:background="@drawable/bg_btn_normal"
+        android:text="@string/mode2"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:letterSpacing="0.05"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 困难模式按钮：深霓虹紫 -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="160dp"
+        android:layout_marginTop="710dp"
+        android:background="@drawable/bg_btn_hard"
+        android:text="@string/mode3"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:letterSpacing="0.05"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 返回按钮：偏暗紫 -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_back"
+        android:layout_width="72dp"
+        android:layout_height="43dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="50dp"
+        android:background="@drawable/bg_btn_back"
+        android:text="@string/back"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 音效开关 -->
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switch1"
         android:layout_width="97dp"
         android:layout_height="48dp"
-        android:layout_marginStart="264dp"
-        android:layout_marginTop="580dp"
+        android:layout_marginStart="288dp"
+        android:layout_marginTop="750dp"
         android:text="@string/sound"
+        android:textColor="#FFFFFF"
+        app:thumbTint="#7B42F5"
+        app:trackTint="#808080"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- 顶部文字 -->
     <TextView
         android:id="@+id/webState2"
         android:layout_width="102dp"
         android:layout_height="28dp"
-        android:layout_marginStart="31dp"
-        android:layout_marginTop="34dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:text="状态：离线"
+        android:textColor="#FFFFFF"
         android:textSize="15sp"
+        android:shadowColor="#000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -93,11 +102,16 @@
         android:id="@+id/username2"
         android:layout_width="139dp"
         android:layout_height="27dp"
-        android:layout_marginStart="228dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:shadowColor="#000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="2"
         android:text="用户名：游客"
+        android:textColor="#FFFFFF"
         android:textSize="15sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

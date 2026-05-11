@@ -5,68 +5,60 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#AED6F1"
+    android:background="@drawable/picture"
     tools:context=".MainActivity">
-
-    <TextView
-        android:layout_width="105dp"
-        android:layout_height="40dp"
-        android:text="@string/aircraftWar"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.522"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.25" />
 
     <Button
         android:id="@+id/button_startgame"
-        android:layout_width="121dp"
-        android:layout_height="52dp"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="308dp"
+        style="@style/StartButton"
         android:text="@string/startGame"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="130dp"
+        android:layout_marginTop="204dp" />
 
     <Button
         android:id="@+id/button_login"
-        android:layout_width="121dp"
+        style="@style/StartButton"
+        android:layout_width="160dp"
         android:layout_height="52dp"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="391dp"
+        android:layout_marginStart="130dp"
+        android:layout_marginTop="296dp"
         android:text="@string/login"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/button_signup"
-        android:layout_width="121dp"
+        style="@style/StartButton"
+        android:layout_width="160dp"
         android:layout_height="52dp"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="475dp"
+        android:layout_marginStart="130dp"
+        android:layout_marginTop="392dp"
         android:text="@string/signup"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/button_showranking"
-        android:layout_width="121dp"
+        style="@style/StartButton"
+        android:layout_width="160dp"
         android:layout_height="52dp"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="560dp"
+        android:layout_marginStart="130dp"
+        android:layout_marginTop="484dp"
         android:text="@string/showRanking"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/setServer"
-        android:layout_width="121dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="645dp"
+        style="@style/StartButton"
+        android:layout_width="161dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="130dp"
+        android:layout_marginTop="576dp"
         android:text="@string/setServer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

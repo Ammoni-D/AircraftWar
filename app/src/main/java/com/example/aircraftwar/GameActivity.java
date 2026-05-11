@@ -54,6 +54,7 @@ public class GameActivity extends AppCompatActivity {
     private Game game;
     private Runnable matchRunnable;
     private int count;
+    private boolean isBackgroundSet = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,11 +100,18 @@ public class GameActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(String error) {
-                        // 匹配失败或仍在等待，继续下一次轮询
+                        // 只在第一次进入时设置背景
+                        if (!isBackgroundSet) {
+                            runOnUiThread(() -> {
+                                View rootView = getWindow().getDecorView();
+                                rootView.setBackgroundResource(R.drawable.match);
+                                isBackgroundSet = true;
+                            });
+                        }
+
                         if(count % 5 == 0) {
                             runOnUiThread(() -> Toast.makeText(GameActivity.this, "等待匹配······", Toast.LENGTH_SHORT).show());
                         }
-                        // 延迟500ms后再次执行本任务
                         mHandler.postDelayed(matchRunnable, 500);
                     }
                 });
