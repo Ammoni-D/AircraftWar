@@ -11,4 +11,10 @@
     <string name="score">分数</string>
     <string name="record">记录分数</string>
     <string name="delete">删除记录</string>
+    <string name="aircraftWar">飞机大战</string>
+    <string name="startGame">开始游戏</string>
+    <string name="login">登录</string>
+    <string name="showRanking">显示排行榜</string>
+    <string name="signup">注册新账号</string>
+    <string name="setServer">设置服务器地址</string>
 </resources>

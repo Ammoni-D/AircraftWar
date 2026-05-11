@@ -7,19 +7,29 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.aircraftwar.MainActivity;
 import com.example.aircraftwar.R;
+import com.example.aircraftwar.web.generalCallBack;
+import com.example.aircraftwar.web.httpClient;
+
 import java.util.List;
 
 public class ScoreAdapter extends BaseAdapter {
     private Context context;
     private List<Score> scoreList;
-    private ScoreDao scoreDao;
+    private ScoreDao scoreDao = null;
 
     public ScoreAdapter(Context context, List<Score> scoreList, ScoreDao scoreDao) {
         this.context = context;
         this.scoreList = scoreList;
         this.scoreDao = scoreDao;
+    }
+
+    public ScoreAdapter(Context context, List<Score> scoreList) {
+        this.context = context;
+        this.scoreList = scoreList;
     }
 
     @Override
@@ -58,7 +68,20 @@ public class ScoreAdapter extends BaseAdapter {
         holder.tvTime.setText("时间：" + score.getRecordTime());
 
         holder.btnDelete.setOnClickListener(v -> {
-            scoreDao.deleteScore(score);
+            if(scoreDao == null) {
+                httpClient.delUserRanking(MainActivity.sessionID, score, new generalCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(context, "删除成功", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+            else scoreDao.deleteScore(score);
             scoreList.remove(position);
             notifyDataSetChanged();
         });

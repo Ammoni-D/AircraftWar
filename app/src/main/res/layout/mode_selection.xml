@@ -68,4 +68,26 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 
+    <TextView
+        android:id="@+id/webState2"
+        android:layout_width="102dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="31dp"
+        android:layout_marginTop="34dp"
+        android:text="状态：离线"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/username2"
+        android:layout_width="139dp"
+        android:layout_height="27dp"
+        android:layout_marginStart="228dp"
+        android:layout_marginTop="36dp"
+        android:text="用户名：游客"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

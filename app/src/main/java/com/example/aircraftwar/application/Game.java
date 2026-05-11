@@ -18,6 +18,7 @@ import android.view.MotionEvent;
 import android.widget.Toast;
 
 import com.example.aircraftwar.GameActivity;
+import com.example.aircraftwar.MainActivity;
 import com.example.aircraftwar.MySurfaceView;
 
 import com.example.aircraftwar.R;
@@ -25,6 +26,10 @@ import com.example.aircraftwar.aircraft.*;
 import com.example.aircraftwar.bullet.BaseBullet;
 import com.example.aircraftwar.basic.AbstractFlyingObject;
 import com.example.aircraftwar.prop.*;
+import com.example.aircraftwar.web.httpClient;
+import com.example.aircraftwar.web.notifyGameOverCallBack;
+import com.example.aircraftwar.web.syncScoreCallBack;
+
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.util.*;
@@ -133,6 +138,21 @@ public abstract class Game extends MySurfaceView {
         return soundPool;
     }
     public int bombMusicId, bulletMusicId, supplyMusicId, gameoverMusicId;
+
+    /**
+     * 网络相关
+     */
+    private boolean oppGameOverFlag = false;
+    private String oppUsername;
+    private int oppScore;
+
+    public void setOppScore(int oppScore) {
+        this.oppScore = oppScore;
+    }
+
+    public void setOppUsername(String oppUsername) {
+        this.oppUsername = oppUsername;
+    }
 
     abstract public void initParameters();
 
@@ -245,6 +265,20 @@ public abstract class Game extends MySurfaceView {
             // 后处理
             postProcessAction();
 
+            // 同步分数:周期500ms
+            if(MainActivity.online && time % 500 == 0) {
+                httpClient.syncScore(MainActivity.sessionID, score, new syncScoreCallBack() {
+                    @Override
+                    public void onSuccess(int oppScore) {
+                        setOppScore(oppScore);
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        mHandler.post(() -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show());
+                    }
+                });
+            }
             //增加难度
             if(CycleJudge(addDifficultyCycle)){
                 addDifficulty();
@@ -265,10 +299,34 @@ public abstract class Game extends MySurfaceView {
                     soundPool.release();
                 }
 
+                // 向服务器通知游戏结束并等待对方结束
+                if (MainActivity.online) {
+                    while(!oppGameOverFlag) {
+                        httpClient.notifyGameOver(MainActivity.sessionID, new notifyGameOverCallBack() {
+                            @Override
+                            public void onSuccess(boolean oppGameOver) {
+                                oppGameOverFlag = oppGameOver;
+                            }
+
+                            @Override
+                            public void onFailure(String error) {
+                                mHandler.post(() -> Toast.makeText(context, error, Toast.LENGTH_SHORT).show());
+                            }
+                        });
+
+                        if(oppGameOverFlag) break;
+                        Toast.makeText(context, "等待对方游戏结束···", Toast.LENGTH_SHORT).show();
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+
                 Message msg = new Message();
                 msg.what = 1;
                 mHandler.sendMessage(msg);
-                // Todo:查找数据，显示在排行榜上
 
                 Toast.makeText(context, "Game over!", Toast.LENGTH_SHORT).show();
             }
@@ -482,14 +540,22 @@ public abstract class Game extends MySurfaceView {
     private void paintScoreAndLife(Canvas canvas) {
         float x = 10;
         float y = 50;
+        float opp_x = 300;
         textPaint.setColor(0xFFFF0000);
         textPaint.setTypeface(Typeface.SANS_SERIF);
         textPaint.setTextSize(50);
 
-        canvas.drawText("SCORE:" + score, x, y, textPaint);
-        y = y + 50;
         canvas.drawText("LIFE:" + heroAircraft.getHp(), x, y, textPaint);
+        canvas.drawText("OPP NAME:" + oppUsername, opp_x, y, textPaint);
         y = y + 50;
+        canvas.drawText("SCORE:" + score, x, y, textPaint);
+        canvas.drawText("OPP SCORE:" + oppScore, opp_x, y, textPaint);
+        y = y + 50;
+
+        if(oppGameOverFlag) {
+            textPaint.setTextSize(100);
+            canvas.drawText("对方已经死亡！", opp_x, y, textPaint);
+        }
 
         textPaint.setColor(0xFFACA9A9);
         textPaint.setTextSize(40);

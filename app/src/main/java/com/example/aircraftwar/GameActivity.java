@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -26,9 +27,15 @@ import com.example.aircraftwar.scoredisplay.Score;
 import com.example.aircraftwar.scoredisplay.ScoreAdapter;
 import com.example.aircraftwar.scoredisplay.ScoreDao;
 import com.example.aircraftwar.scoredisplay.ScoreDaoImpl;
+import com.example.aircraftwar.web.generalCallBack;
+import com.example.aircraftwar.web.getRankingCallBack;
+import com.example.aircraftwar.web.httpClient;
+import com.example.aircraftwar.web.requestMatchingCallBack;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class GameActivity extends AppCompatActivity {
@@ -37,23 +44,26 @@ public class GameActivity extends AppCompatActivity {
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if(msg.what==1){
-                showInputNameDialog();
+                if(MainActivity.online) uploadScore();
+                else showInputNameDialog();
             }
         }
     };
 
-    private ScoreDao scoreDao;
+    private static final ScoreDao scoreDao = MainActivity.scoreDao;
     private Game game;
+    private String oppUsername;
+    private Runnable matchRunnable;
+    private int count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        scoreDao = new ScoreDaoImpl(this);
-
         // 每局游戏开始前：重置英雄机
         HeroAircraft.resetHeroAircraft();
+        count = 0;
 
         String mode = getIntent().getStringExtra("mode");
         boolean musicSetting = getIntent().getBooleanExtra("musicSetting", false);
@@ -71,8 +81,38 @@ public class GameActivity extends AppCompatActivity {
                 break;
         }
 
-        setContentView(game);
-        game.action();
+        // 定义轮询任务
+        matchRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // 发起单次匹配查询
+                httpClient.requestMatching(MainActivity.sessionID, mode, new requestMatchingCallBack() {
+                    @Override
+                    public void onSuccess(String oppName) {
+                        // 匹配成功，停止轮询
+                        mHandler.removeCallbacks(matchRunnable);
+                        oppUsername = oppName;
+                        // 启动游戏
+                        setContentView(game);
+                        game.action();
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        // 匹配失败或仍在等待，继续下一次轮询
+                        if(count % 5 == 0) {
+                            runOnUiThread(() -> Toast.makeText(GameActivity.this, "等待匹配······", Toast.LENGTH_SHORT).show());
+                        }
+                        // 延迟500ms后再次执行本任务
+                        mHandler.postDelayed(matchRunnable, 500);
+                    }
+                });
+                count++;
+            }
+        };
+
+        // 开始第一次轮询
+        mHandler.post(matchRunnable);
 
         ViewCompat.setOnApplyWindowInsetsListener(game, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -103,14 +143,61 @@ public class GameActivity extends AppCompatActivity {
     private void showRankingList() {
         setContentView(R.layout.ranking_list);
         ListView listView = findViewById(R.id.list_view);
-        ScoreAdapter adapter = new ScoreAdapter(this, scoreDao.getAllScores(), scoreDao);
-        listView.setAdapter(adapter);
+        if(MainActivity.online) {
+            httpClient.getUserRanking(MainActivity.sessionID, new getRankingCallBack() {
+                @Override
+                public void onSuccess(List<Score> scores) {
+                    runOnUiThread(() -> listView.setAdapter(new ScoreAdapter(GameActivity.this, scores)));
+                }
 
-        findViewById(R.id.btn_back).setOnClickListener(v -> finish());
+                @Override
+                public void onFailure(String error) {
+                    runOnUiThread(() -> Toast.makeText(GameActivity.this, error, Toast.LENGTH_SHORT).show());
+                }
+            });
+        }
+        else {
+            ScoreAdapter adapter = new ScoreAdapter(this, scoreDao.getAllScores(), scoreDao);
+            listView.setAdapter(adapter);
+        }
 
-        findViewById(R.id.btn_clear).setOnClickListener(v -> {
-            ((ScoreDaoImpl) scoreDao).clearAllScores();
-            listView.setAdapter(new ScoreAdapter(this, scoreDao.getAllScores(), scoreDao));
+        findViewById(R.id.btn_back).setOnClickListener(view -> finish());
+        findViewById(R.id.btn_clear).setOnClickListener(view -> {
+            if(MainActivity.online) {
+                httpClient.delAllUserRanking(MainActivity.sessionID, new generalCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        runOnUiThread(() -> Toast.makeText(GameActivity.this, "已清除全部记录", Toast.LENGTH_SHORT).show());
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        runOnUiThread(() -> Toast.makeText(GameActivity.this, error, Toast.LENGTH_SHORT).show());
+                    }
+                });
+                listView.setAdapter(new ScoreAdapter(this, new ArrayList<>()));
+            }
+            else {
+                ((ScoreDaoImpl) scoreDao).clearAllScores();
+                listView.setAdapter(new ScoreAdapter(this, scoreDao.getAllScores(), scoreDao));
+            }
+        });
+    }
+
+    private void uploadScore() {
+        httpClient.addUserRanking(MainActivity.sessionID, game.getScore(), new generalCallBack() {
+            @Override
+            public void onSuccess() {
+                runOnUiThread(() -> {
+                    Toast.makeText(GameActivity.this, "成功上传分数", Toast.LENGTH_SHORT).show();
+                    showRankingList();
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                runOnUiThread(() -> Toast.makeText(GameActivity.this, error, Toast.LENGTH_SHORT).show());
+            }
         });
     }
 
