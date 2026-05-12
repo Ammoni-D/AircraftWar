@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.graphics.Insets;
@@ -187,6 +188,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             showInputIPAddressDialog("设置服务器地址");
         });
 
+        // 在 Activity 或 Fragment 中
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // 这里可以执行自定义的退出动画
+                setContentView(layoutStart);
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -228,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     listener.onUserInfoConfirmed(username, password);
                     setContentView(layoutStart);
                 })
-                .setCancelable(false)
+                .setCancelable(true)
                 .show();
     }
 
@@ -245,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     httpClient.setServerPort(port.getText().toString().trim());
                     setContentView(layoutStart);
                 })
-                .setCancelable(false)
+                .setCancelable(true)
                 .show();
     }
 }
