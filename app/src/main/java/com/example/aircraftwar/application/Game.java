@@ -562,11 +562,13 @@ public abstract class Game extends MySurfaceView {
         y = y + 50;
 
         // 敌方信息
-        canvas.drawText("OPP NAME:" + oppUsername, opp_x, y - 100, textPaint);
-        canvas.drawText("OPP SCORE:" + oppScore, opp_x, y - 50, textPaint);
-        if(oppGameOverFlag) {
-            textPaint.setTextSize(100);
-            canvas.drawText("对方已经死亡！", opp_x, y, textPaint);
+        if(MainActivity.online) {
+            canvas.drawText("OPP NAME:" + oppUsername, opp_x, y - 100, textPaint);
+            canvas.drawText("OPP SCORE:" + oppScore, opp_x, y - 50, textPaint);
+            if (oppGameOverFlag) {
+                textPaint.setTextSize(100);
+                canvas.drawText("对方已经死亡！", opp_x, y + 50, textPaint);
+            }
         }
 
         textPaint.setColor(0xFFACA9A9);
